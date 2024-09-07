@@ -15,8 +15,8 @@ Copyumbra-lang/
 │
 ├── test/                   # Test files
 │   ├── lexer_tests/        # Tests for the lexical analyzer
-│   ├── parser_tests/       # Tests for the parser (future)
-│   └── codegen_tests/      # Tests for code generation (future)
+│   ├── parser_tests/       # Tests for the parser 
+│   └── codegen_tests/      # Tests for code generation
 │
 ├── examples/               # Example Umbra Lang programs
 │

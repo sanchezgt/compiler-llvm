@@ -13,10 +13,6 @@ class ASTVisitor {
     virtual ~ASTVisitor() = default;
 
     virtual void visit(VariableDeclNode &node) = 0;
-    // Add more visit methods for other node types as you implement them
-    // For example:
-    // virtual void visit(BinaryExpressionNode& node) = 0;
-    // virtual void visit(IfStatementNode& node) = 0;
 };
 
 class PrintVisitor : public ASTVisitor {
@@ -24,7 +20,7 @@ class PrintVisitor : public ASTVisitor {
     PrintVisitor();
 
     void visit(VariableDeclNode &node) override;
-    // Implement other visit methods as you add more node types
+    // Implement
 
   private:
     int indentLevel;

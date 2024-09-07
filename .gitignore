@@ -66,21 +66,9 @@ Thumbs.db
 # LLVM IR files (if generated as intermediate output)
 *.ll
 
-# Temporary files
-*.tmp
-*.temp
-
-# Log files
-*.log
-
 # User-specific files
 *.user
 *.userosscache
 *.sln.docstates
 
-# Dependency directories (uncomment if you're using a dependency manager)
-# deps/
-# vendor/
 
-# Custom Umbra Lang specific ignores (add as needed)
-*.umbra

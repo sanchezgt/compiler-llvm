@@ -43,9 +43,6 @@ file(GLOB_RECURSE SOURCES
 add_executable(umbra_compiler ${SOURCES})
 llvm_map_components_to_libnames(llvm_libs support core irreader)
 target_link_libraries(umbra_compiler ${llvm_libs} umbra_lexer)
-
-
-# Set output directory
 set_target_properties(umbra_compiler
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
@@ -55,23 +52,18 @@ set_target_properties(umbra_compiler
 # Add tests
 include(FetchContent)
 
-# Descargar GoogleTest si no está presente
+# Descargar GoogleTest
 FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/release-1.11.0.zip
 )
 FetchContent_MakeAvailable(googletest)
 
-# Añadir ejecutable de test
 add_executable(lexer_test test/lexer_test.cpp)
-
-# Enlazar GoogleTest
 target_link_libraries(lexer_test umbra_lexer gtest gtest_main)
-
-# Habilitar la ejecución de tests
 add_test(NAME lexer_test COMMAND lexer_test)
 
-# Set output directory
+
 set_target_properties(lexer_test
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"

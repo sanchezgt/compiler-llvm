@@ -21,8 +21,7 @@ void PrintVisitor::visit(VariableDeclNode &node) {
         printIndent();
         std::cout << "Initializer: " << std::endl;
         increaseIndent();
-        // Here you would typically visit the initializer expression
-        // For now, we'll just print a placeholder
+        // to implement
         printIndent();
         std::cout << "[Expression]" << std::endl;
         decreaseIndent();
