@@ -1,16 +1,17 @@
 This repository contains the implementation of the Umbra Lang compiler. The project is structured as follows:
+
 Copyumbra-lang/
 │
 ├── src/                    # Source files for the compiler
 │   ├── lexer/              # Lexical analyzer implementation
-│   ├── parser/             # Syntactic parser (to be implemented)
+│   ├── parser/             # Syntactic parser 
 │   ├── ast/                # Abstract Syntax Tree definitions
 │   ├── codegen/            # Code generation for LLVM IR
 │   └── main.cpp            # Main entry point of the compiler
 │
-├── include/                # Public header files (if any)
+├── include/                # Public header files
 │
-├── lib/                    # External libraries (if any)
+├── lib/                    # External libraries
 │
 ├── test/                   # Test files
 │   ├── lexer_tests/        # Tests for the lexical analyzer
@@ -30,6 +31,8 @@ Copyumbra-lang/
 ├── CMakeLists.txt          # CMake configuration file
 ├── .gitignore              # Git ignore file
 └── README.md               # This file
+
+
 Directory Contents
 
 src/: Contains all the source code for the Umbra Lang compiler.
@@ -57,8 +60,5 @@ CMakeLists.txt: CMake build system configuration.
 README.md: Provides an overview of the project (you are here!).
 
 Getting Started
-(Add instructions on how to clone, build, and run the project here.)
-Contributing
-(Add guidelines for contributing to the project here.)
+
 License
-(Specify the license under which this project is released.)
