@@ -7,7 +7,6 @@
 
 namespace umbra {
 
-// Map associating tokens and string representation
 const std::unordered_map<TokenType, std::string> tokenTypeToStringMap = {
     // End of file token
     {TokenType::TOK_EOF, "TOK_EOF"},
