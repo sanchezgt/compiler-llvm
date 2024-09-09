@@ -17,7 +17,9 @@
 <function_call> ::= <identifier> "(" [<argument_list>] ")"
 <argument_list> ::= <expression> ("," <expression>)*
 
-<conditional> ::= "if" <expression> "{" <statement>+ "}" ["else" "{" <statement>+ "}"]
+<conditional> ::= "if" <expression> "{" <statement>+ "}" ["elseif" <expression> "{" <statement>+ "}"]* ["else" "{" <statement>+ "}"]
+
+
 
 
 <loop> ::= "repeat" <integer> "times" "{" <statement>+ "}"

@@ -9,50 +9,10 @@ namespace umbra {
 
 Lexer::Lexer(const std::string &source)
     : source(source), internalErrorManager(std::make_unique<ErrorManager>()),
-      errorManager(internalErrorManager.get()), current(0), line(1), column(1) {
-    initKeywords();
-}
+      errorManager(internalErrorManager.get()), current(0), line(1), column(1) {}
 
 Lexer::Lexer(const std::string &source, ErrorManager &externalErrorManager)
-    : source(source), errorManager(&externalErrorManager), current(0), line(1), column(1) {
-    initKeywords();
-}
-
-void Lexer::initKeywords() {
-    Lexer::keywords = {// Data type keywords
-                       {"int", TokenType::TOK_INT},
-                       {"float", TokenType::TOK_FLOAT},
-                       {"bool", TokenType::TOK_BOOL},
-                       {"char", TokenType::TOK_CHAR},
-                       {"string", TokenType::TOK_STRING},
-                       //{"array", TokenType::TOK_ARRAY}, wait for array definition
-
-                       // Control structure keywords
-                       {"if", TokenType::TOK_IF},
-                       {"else", TokenType::TOK_ELSE},
-                       {"repeat", TokenType::TOK_REPEAT},
-                       {"times", TokenType::TOK_TIMES},
-
-                       // Function-related keywords
-                       {"func", TokenType::TOK_FUNC},
-                       {"return", TokenType::TOK_RETURN},
-
-                       // Memory management keywords
-                       {"new", TokenType::TOK_NEW},
-                       {"delete", TokenType::TOK_DELETE},
-
-                       // Logical operator keywords
-                       {"and", TokenType::TOK_AND},
-                       {"or", TokenType::TOK_OR},
-
-                       // Comparison operator keywords
-                       {"equal", TokenType::TOK_EQUAL},
-                       {"different", TokenType::TOK_DIFFERENT},
-                       {"less_than", TokenType::TOK_LESS},
-                       {"greater_than", TokenType::TOK_GREATER},
-                       {"less_or_equal", TokenType::TOK_LESS_EQ},
-                       {"greater_or_equal", TokenType::TOK_GREATER_EQ}};
-}
+    : source(source), errorManager(&externalErrorManager), current(0), line(1), column(1) {}
 
 std::vector<Lexer::Token> Lexer::tokenize() {
     tokens.clear();
@@ -223,7 +183,8 @@ void Lexer::identifier() {
         advance();
 
     std::string text = source.substr(start, current - start);
-    TokenType type = keywords.count(text) ? keywords[text] : TokenType::TOK_IDENTIFIER;
+    TokenType type = tokenManager.getKeywords().count(text) ? tokenManager.getKeywords().at(text)
+                                                            : TokenType::TOK_IDENTIFIER;
     addToken(type, text);
 }
 

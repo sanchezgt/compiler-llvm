@@ -1,7 +1,6 @@
 #include "ast/visitor/ASTVisitor.h"
 #include "error/ErrorManager.h"
 #include "lexer/Lexer.h"
-#include "lexer/TokensUtils.h"
 #include "parser/Parser.h"
 #include <fstream>
 #include <iostream>
@@ -44,7 +43,8 @@ int main(int argc, char *argv[]) {
         // Print tokens (for debugging)
         std::cout << "Tokens:" << std::endl;
         for (const auto &token : tokens) {
-            std::cout << "Token: Type=" << umbra::tokenTypeToString(token.type) << ", Lexeme='";
+            std::cout << "Token: Type=" << lexer.tokenManager.tokenTypeToString(token.type)
+                      << ", Lexeme='";
             if (token.type == umbra::TokenType::TOK_NEWLINE) {
                 std::cout << "\\n";
             } else {
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        // TODO: Add further stages of compilation here (semantic analysis, code generation, etc.)
+        // TODO: Add further stages of compilation here
 
     } catch (const std::exception &e) {
         std::cerr << "Error: " << e.what() << std::endl;

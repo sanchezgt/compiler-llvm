@@ -1,5 +1,9 @@
-#include "VariableDecNode.h"
+#include "StatementNode.h"
+
+#include "../expressionnodes/ExpressionNode.h"
 #include "../visitor/ASTVisitor.h"
+#include <memory>
+#include <string>
 
 namespace umbra {
 

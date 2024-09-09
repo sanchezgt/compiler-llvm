@@ -6,6 +6,23 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 
+# Set default build type to Debug if not specified
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build: Debug or Release" FORCE)
+endif()
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# Compiler flags for Debug and Release
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  message(STATUS "Configuring Debug build")
+  set(CMAKE_CXX_FLAGS_DEBUG "-g")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+  message(STATUS "Configuring Release build")
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+endif()
+
+
 if(MSVC)
   add_compile_options(/W4 /WX)
 else()
@@ -36,6 +53,7 @@ file(GLOB_RECURSE SOURCES
   "src/main.cpp"  
   "src/parser/*.cpp"  
   "src/lexer/*.cpp" 
+  "src/ast/*.cpp"
   "src/ast/statementnodes/*.cpp"
   "src/ast/expressionnodes/*.cpp"
   "src/ast/visitor/*.cpp"

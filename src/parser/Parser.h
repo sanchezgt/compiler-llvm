@@ -2,7 +2,7 @@
 #define PARSER_H
 
 #include "../ast/ASTNode.h"
-#include "../ast/statementnodes/VariableDecNode.h"
+#include "../ast/statementnodes/StatementNode.h"
 #include "../lexer/Lexer.h"
 #include <memory>
 #include <vector>
@@ -21,9 +21,12 @@ class Parser {
     std::vector<Lexer::Token> tokens;
     std::vector<Lexer::Token>::const_iterator current;
 
-    std::unique_ptr<ASTNode> Parser::parseStatement();
+    std::unique_ptr<ASTNode> parseStatement();
     std::unique_ptr<VariableDeclNode> parseVariableDeclaration();
+    std::unique_ptr<FunctionDeclNode> parseFunctionDefinition();
     std::unique_ptr<ExpressionNode> parseExpression();
+    TokenType parseTypeSpecifier();
+    bool isTypeSpecifier(TokenType type) const;
 
     bool match(TokenType type);
     bool check(TokenType type) const;

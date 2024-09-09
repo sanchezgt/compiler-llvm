@@ -2,9 +2,9 @@
 #define VISITOR_H
 
 #include "../ASTNode.h"
+#include "../ProgramNode.h"
 #include "../expressionnodes/ExpressionNode.h"
 #include "../statementnodes/StatementNode.h"
-#include "../statementnodes/VariableDecNode.h"
 
 namespace umbra {
 
@@ -13,13 +13,16 @@ class ASTVisitor {
     virtual ~ASTVisitor() = default;
 
     virtual void visit(VariableDeclNode &node) = 0;
+    virtual void visit(ProgramNode &node) = 0;
 };
 
 class PrintVisitor : public ASTVisitor {
   public:
     PrintVisitor();
+    ~PrintVisitor() override;
 
     void visit(VariableDeclNode &node) override;
+    void visit(ProgramNode &node) override;
     // Implement
 
   private:

@@ -20,6 +20,7 @@ class Lexer {
         Token(TokenType t, std::string l, int ln, int col)
             : type(t), lexeme(std::move(l)), line(ln), column(col) {}
     };
+    TokenManager tokenManager;
 
     Lexer(const std::string &source);
     Lexer(const std::string &source, ErrorManager &externalErrorManager);
@@ -32,13 +33,12 @@ class Lexer {
     std::unique_ptr<ErrorManager> internalErrorManager;
     ErrorManager *errorManager;
     std::vector<Token> tokens;
-    std::unordered_map<std::string, TokenType> keywords;
+    // std::unordered_map<std::string, TokenType> keywords;
     int current = 0;
     int line = 1;
     int start = 0;
     int column = 1;
 
-    void initKeywords();
     char advance();
     bool isAtEnd() const;
     char peek() const;
