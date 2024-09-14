@@ -62,6 +62,7 @@ enum class TokenType {
     TOK_IDENTIFIER,
     TOK_NUMBER,
     TOK_STRING_LITERAL,
+    TOK_CHAR_LITERAL,
 
     // Symbols
     TOK_LEFT_BRACE,  // '{'
@@ -139,6 +140,7 @@ class TokenManager {
             {TokenType::TOK_IDENTIFIER, "TOK_IDENTIFIER"},
             {TokenType::TOK_NUMBER, "TOK_NUMBER"},
             {TokenType::TOK_STRING_LITERAL, "TOK_STRING_LITERAL"},
+            {TokenType::TOK_CHAR_LITERAL, "TOK_CHAR_LITERAL"},
             {TokenType::TOK_LEFT_BRACE, "TOK_LEFT_BRACE"},
             {TokenType::TOK_RIGHT_BRACE, "TOK_RIGHT_BRACE"},
             {TokenType::TOK_LEFT_BRACKET, "TOK_LEFT_BRACKET"},

@@ -53,21 +53,22 @@ int main(int argc, char *argv[]) {
             std::cout << "', Line=" << token.line << ", Column=" << token.column << std::endl;
         }
 
-        if (errorManager.hasErrors()) {
-            std::cerr << "Lexical analysis failed. Errors:\n";
-            std::cerr << errorManager.getErrorReport();
-            return 1;
-        }
-
-        std::cout << "Lexical analysis completed successfully." << std::endl;
+        std::cout << "Lexical analysis completed" << std::endl;
 
         // Perform parsing
-        umbra::Parser parser(tokens);
+        umbra::Parser parser(tokens, errorManager);
         std::unique_ptr<umbra::ASTNode> ast;
 
         try {
             ast = parser.parse();
-            std::cout << "Parsing completed successfully." << std::endl;
+            std::cout << "Parsing completed." << std::endl;
+
+            if (errorManager.hasErrors()) {
+                std::cerr << "Compilation failed. Errors:\n";
+                std::cerr << errorManager.getErrorReport();
+            } else {
+                std::cerr << "Compilation successfully.\n";
+            }
 
             // Print AST using our new PrintVisitor
             std::cout << "Abstract Syntax Tree:" << std::endl;

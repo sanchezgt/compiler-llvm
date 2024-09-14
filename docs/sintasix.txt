@@ -12,7 +12,9 @@
 | <loop>
 | <memory_management>
 | <return_statement>
-<variable_declaration> ::= <type> <identifier> ["=" <expression>]
+<variable_declaration> ::= <type> [ "[" <array_size> "]" ] <identifier> ["=" <expression>] <newline>
+<array_size> ::= <const> | <identifier>
+
 
 <function_call> ::= <identifier> "(" [<argument_list>] ")"
 <argument_list> ::= <expression> ("," <expression>)*

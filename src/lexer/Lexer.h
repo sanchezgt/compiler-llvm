@@ -48,6 +48,7 @@ class Lexer {
     void addToken(TokenType type, const std::string &lexeme);
     void string();
     void number();
+    void charliteral();
     void identifier();
     bool isAlpha(char c) const;
     bool isAlphaNumeric(char c) const;

@@ -4,33 +4,41 @@
 #include "../../lexer/Tokens.h"
 #include "../ASTNode.h"
 #include "../expressionnodes/ExpressionNode.h"
+#include "../visitor/ASTVisitor.h"
 #include <iostream>
 #include <memory>
 #include <vector>
 
 namespace umbra {
 
+class ExpressionNode;
+
 class StatementNode : public ASTNode {
   public:
+    void accept(ASTVisitor &visitor) = 0;
     virtual ~StatementNode() noexcept = default;
 };
 
-class VariableDeclNode : public StatementNode {
+class st_VariableDeclNode : public StatementNode {
   public:
-    VariableDeclNode(TokenType type, const std::string &name,
-                     std::unique_ptr<ExpressionNode> initializer = nullptr);
+    st_VariableDeclNode(TokenType type, const std::string &name,
+                        std::unique_ptr<ExpressionNode> initializer,
+                        std::unique_ptr<ExpressionNode> arraySize);
 
     TokenType getType() const { return type; }
     const std::string &getName() const { return name; }
-    const ExpressionNode *getInitializer() const { return initializer.get(); }
+    ExpressionNode *getInitializer() const { return initializer.get(); }
+    ExpressionNode *getArraySize() const { return arraySize.get(); }
 
-    void accept(ASTVisitor &visitor) override;
-    ~VariableDeclNode() noexcept override = default;
+    void accept(ASTVisitor &visitor);
+
+    ~st_VariableDeclNode() noexcept override = default;
 
   private:
     TokenType type;
     std::string name;
     std::unique_ptr<ExpressionNode> initializer;
+    std::unique_ptr<ExpressionNode> arraySize;
 };
 
 class ParameterNode : public ASTNode {
@@ -39,6 +47,7 @@ class ParameterNode : public ASTNode {
 
     TokenType getType() const { return type; }
     const std::string &getName() const { return name; }
+    void accept(ASTVisitor &visitor) = 0;
 
   private:
     TokenType type;
@@ -51,6 +60,7 @@ class ReturnStatementNode : public StatementNode {
         : returnValue(std::move(returnValue)) {}
 
     const ExpressionNode *getReturnValue() const { return returnValue.get(); }
+    void accept(ASTVisitor &visitor) = 0;
 
     ~ReturnStatementNode() noexcept override = default;
 
@@ -66,6 +76,7 @@ class FunctionDeclNode : public StatementNode {
         : name(std::move(name)), params(std::move(params)), returnType(returnType),
           body(std::move(body)), returnStmt(std::move(returnStmt)) {}
 
+    void accept(ASTVisitor &visitor) = 0;
     ~FunctionDeclNode() noexcept override = default;
 
   private:

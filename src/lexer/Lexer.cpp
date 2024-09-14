@@ -38,6 +38,9 @@ std::vector<Lexer::Token> Lexer::tokenize() {
         case '\t':
             // Ignorar espacios en blanco
             break;
+        case '\'':
+            charliteral();
+            break;
         case '"':
             string();
             break;
@@ -132,6 +135,25 @@ void Lexer::addToken(TokenType type) { addToken(type, source.substr(start, curre
 
 void Lexer::addToken(TokenType type, const std::string &lexeme) {
     tokens.emplace_back(type, lexeme, line, column - lexeme.length());
+}
+
+void Lexer::charliteral() {
+    while (peek() != '\'' && !isAtEnd()) {
+        advance();
+    }
+    if (isAtEnd()) {
+        std::string errorMsg = "Unterminated char starting at line " + std::to_string(line) +
+                               ", column " + std::to_string(column);
+        errorManager->addError(
+            std::make_unique<CompilerError>(ErrorType::LEXICAL, errorMsg, line, column));
+        return;
+    }
+    // get closing \'
+    advance();
+    std::string value = source.substr(start + 1, current - start - 2); // clear \""
+    std::cout << "----->" << value << "<--";
+
+    addToken(TokenType::TOK_CHAR_LITERAL, value);
 }
 
 void Lexer::string() {

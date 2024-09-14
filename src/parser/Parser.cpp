@@ -8,7 +8,14 @@ namespace umbra {
 
 // Parser::Parser(Lexer &lexer) : lexer(lexer) {}
 
-Parser::Parser(const std::vector<Lexer::Token> &tokens) : tokens(tokens), current(tokens.begin()) {}
+Parser::Parser(const std::vector<Lexer::Token> &tokens)
+    : tokens(tokens), current(tokens.begin()), errorManager(new ErrorManager()),
+      previousToken(*current) {}
+
+// Constructor que usa un ErrorManager externo
+Parser::Parser(const std::vector<Lexer::Token> &tokens, ErrorManager &externalErrorManager)
+    : tokens(tokens), current(tokens.begin()), errorManager(&externalErrorManager),
+      previousToken(*current) {}
 
 std::unique_ptr<ASTNode> Parser::parse() {
     std::vector<std::unique_ptr<ASTNode>> ast;
@@ -72,24 +79,170 @@ std::unique_ptr<ASTNode> Parser::parseStatement() {
     }
 }
 
-std::unique_ptr<VariableDeclNode> Parser::parseVariableDeclaration() {
-    TokenType type;
-    type = parseTypeSpecifier();
-    // TODO: Array support is needed here []
+bool Parser::isTypeCompatible(TokenType declaredType, ExpressionNode *expr) {
+    if (declaredType == TokenType::TOK_INT) {
+        return dynamic_cast<ex_IntegerLiteralNode *>(expr) != nullptr;
+    } else if (declaredType == TokenType::TOK_FLOAT) {
+        return dynamic_cast<ex_FloatLiteralNode *>(expr) != nullptr ||
+               dynamic_cast<ex_IntegerLiteralNode *>(expr) != nullptr;
+    } else if (declaredType == TokenType::TOK_STRING) {
+        return dynamic_cast<ex_StringLiteralNode *>(expr) != nullptr;
+    }
+    // Handle other types...
+    return false;
+}
+
+std::string Parser::getExpressionTypeName(ExpressionNode *expr) {
+    if (dynamic_cast<ex_IntegerLiteralNode *>(expr))
+        return "int";
+    if (dynamic_cast<ex_FloatLiteralNode *>(expr))
+        return "float";
+    if (dynamic_cast<ex_BoolLiteralNode *>(expr))
+        return "bool";
+    if (dynamic_cast<ex_StringLiteralNode *>(expr))
+        return "string";
+    return "unknown";
+}
+
+std::string Parser::getTypeName(TokenType type) {
+    if (type == TokenType::TOK_INT)
+        return "int";
+    if (type == TokenType::TOK_FLOAT)
+        return "float";
+    if (type == TokenType::TOK_STRING)
+        return "string";
+    if (type == TokenType::TOK_BOOL)
+        return "bool";
+
+    return "unknown";
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseNumber(const Lexer::Token &token) {
+    /*
+      TODO: not support to hexa, octal?
+     */
+    const std::string &lexeme = token.lexeme;
+    try {
+        // entero
+        size_t pos;
+        long long intValue = std::stoll(lexeme, &pos);
+        if (pos == lexeme.length()) {
+            return std::make_unique<ex_IntegerLiteralNode>(static_cast<int>(intValue));
+        }
+        double doubleValue = std::stod(lexeme);
+        return std::make_unique<ex_FloatLiteralNode>(doubleValue);
+    } catch (const std::out_of_range &e) {
+        try {
+            double doubleValue = std::stod(lexeme);
+            return std::make_unique<ex_FloatLiteralNode>(doubleValue);
+        } catch (const std::out_of_range &e) {
+            throw std::runtime_error("Number out of range: " + lexeme);
+        }
+    } catch (const std::invalid_argument &e) {
+        // not a number token!
+        throw std::runtime_error("Invalid number format: " + lexeme);
+    }
+}
+
+std::unique_ptr<ExpressionNode> Parser::parseExpression() {
+    Lexer::Token currentToken = peek();
+
+    switch (currentToken.type) {
+    case TokenType::TOK_NUMBER: {
+        advance();
+        return parseNumber(currentToken);
+    }
+
+    case TokenType::TOK_STRING_LITERAL: {
+        advance();
+        return std::make_unique<ex_StringLiteralNode>(currentToken.lexeme);
+    }
+
+    case TokenType::TOK_BOOL: {
+        advance();
+        bool boolValue = (currentToken.lexeme == "true");
+        return std::make_unique<ex_BoolLiteralNode>(boolValue);
+    }
+
+    case TokenType::TOK_IDENTIFIER: {
+        advance();
+        return std::make_unique<ex_IdentifierNode>(currentToken.lexeme);
+    }
+
+    case TokenType::TOK_CHAR_LITERAL: {
+        advance();
+        return std::make_unique<ex_CharLiteralNode>(currentToken.lexeme);
+    }
+
+    default:
+        std::string errorMsg =
+            "Unexpected token in expression: " + TokenManager::tokenTypeToString(currentToken.type);
+        errorManager->addError(std::make_unique<CompilerError>(
+            ErrorType::SYNTACTIC, errorMsg, currentToken.line, currentToken.column));
+        // throw std::runtime_error(errorMsg);
+        return nullptr;
+    }
+
+    return nullptr;
+}
+
+std::unique_ptr<st_VariableDeclNode> Parser::parseVariableDeclaration() {
+    /*
+    <variable_declaration> ::= <type> [ "[" <array_size> "]" ] <identifier> ["=" <expression>]
+    <newline> <array_size> ::= <const> | <identifier>
+     */
+
+    // type specifier
+    TokenType type = parseTypeSpecifier();
+
+    // array?
+    std::unique_ptr<ExpressionNode> arraySize = nullptr;
+    if (match(TokenType::TOK_LEFT_BRACKET)) {
+        if (peek().type == TokenType::TOK_NUMBER || peek().type == TokenType::TOK_IDENTIFIER) {
+            arraySize = parseExpression();
+        } else {
+            std::string errorMsg = "Expected constant or identifier for array size.";
+            errorManager->addError(std::make_unique<CompilerError>(ErrorType::SYNTACTIC, errorMsg,
+                                                                   peek().line, peek().column));
+            throw std::runtime_error(errorMsg);
+        }
+        consume(TokenType::TOK_RIGHT_BRACKET, "Expected ']' after array size.");
+    }
+
+    // name (TOK_IDENTIFIER)
     auto token = consume(TokenType::TOK_IDENTIFIER, "Expected variable name");
     std::string name = token.lexeme;
 
+    // initializer?
     std::unique_ptr<ExpressionNode> initializer = nullptr;
     if (match(TokenType::TOK_ASSIGN)) {
         initializer = parseExpression();
+        if (initializer) {
+            if (!isTypeCompatible(type, initializer.get())) {
+                std::string errorMsg =
+                    "Type mismatch in initialization of '" + name + "'. Cannot convert from " +
+                    getExpressionTypeName(initializer.get()) + " to " + getTypeName(type);
+                errorManager->addError(std::make_unique<CompilerError>(
+                    ErrorType::SEMANTIC, errorMsg, previous().line, previous().column));
+            }
+        } else {
+            std::string errorMsg = "Expected expression after '=' in variable declaration.";
+            errorManager->addError(std::make_unique<CompilerError>(ErrorType::SYNTACTIC, errorMsg,
+                                                                   peek().line, peek().column));
+        }
     }
 
+    // TOK_NEWLINE
     if (!match(TokenType::TOK_NEWLINE)) {
-        throw std::runtime_error("Expected newline after variable declaration");
+        std::string errorMsg = "Expected newline after variable declaration.";
+        errorManager->addError(std::make_unique<CompilerError>(ErrorType::SYNTACTIC, errorMsg,
+                                                               peek().line, peek().column));
+        throw std::runtime_error(errorMsg);
     }
-
-    return std::make_unique<VariableDeclNode>(type, name, std::move(initializer));
+    return std::make_unique<st_VariableDeclNode>(type, name, std::move(initializer),
+                                                 std::move(arraySize));
 }
+
 /*
 std::unique_ptr<FunctionDeclNode> Parser::parseFunctionDefinition() {
     consume(TokenType::TOK_FUNC, "Expected 'func' at the beginning of function definition");
@@ -129,14 +282,6 @@ std::unique_ptr<FunctionDeclNode> Parser::parseFunctionDefinition() {
 */
 /*Expression*/
 
-std::unique_ptr<ExpressionNode> Parser::parseExpression() {
-    // TODO: Implement expression parsing
-    while (!check(TokenType::TOK_NEWLINE) && !check(TokenType::TOK_EOF)) {
-        advance();
-    }
-    return nullptr;
-}
-
 /*Utils*/
 
 bool Parser::match(TokenType type) {
@@ -154,10 +299,14 @@ bool Parser::check(TokenType type) const {
 }
 
 Lexer::Token Parser::advance() {
-    if (!isAtEnd())
-        current++;
-    return peek();
+    if (!isAtEnd()) {
+        previousToken = *current;
+        ++current;
+    }
+    return previous();
 }
+
+Lexer::Token Parser::previous() const { return previousToken; }
 
 Lexer::Token Parser::peek() const { return *current; }
 
@@ -169,6 +318,8 @@ Lexer::Token Parser::consume(TokenType type, const std::string &message) {
         advance();
         return currentToken;
     }
+    errorManager->addError(
+        std::make_unique<CompilerError>(ErrorType::SYNTACTIC, message, peek().line, peek().column));
     throw std::runtime_error(message);
 }
 

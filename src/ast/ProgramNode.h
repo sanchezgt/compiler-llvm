@@ -13,7 +13,7 @@ class ProgramNode : public ASTNode {
 
     const std::vector<std::unique_ptr<ASTNode>> &getStatements() const { return ast; }
 
-    void accept(ASTVisitor &visitor) override;
+    void accept(ASTVisitor &visitor);
     ~ProgramNode() noexcept override = default;
 
   private:
