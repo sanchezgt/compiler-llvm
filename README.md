@@ -35,7 +35,7 @@ Copyumbra-lang/
 
 Directory Contents
 
-src/: Contains all the source code for the Umbra Lang compiler.
+src/: Contains all the source code for the compiler.
 
 lexer/: Implementation of the lexical analyzer.
 parser/: Will contain the syntactic parser (to be implemented).
